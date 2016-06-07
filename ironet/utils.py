@@ -5,8 +5,6 @@ import math
 import time
 import sys
 from functools import wraps
-from proxycepion import Connection
-
 
 
 def retry(tries, delay=0.1, backoff=2):
@@ -44,10 +42,6 @@ def retry(tries, delay=0.1, backoff=2):
         return f_retry  # true decorator -> decorated function
     return deco_retry  # @retry(arg[, ...]) -> true decorator
 
-@retry(tries=4)
-def fail(text):
-    raise ProxyError
-
 
 @retry(tries=4)
 def search_query(query):
@@ -57,8 +51,8 @@ def search_query(query):
                              params={'as_epq': query,
                                      "tbs": "qdr:a"},
                              #proxies={"http": "http://188.40.110.2"},
-                             headers={"User-Agent": "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.7 GTB7.1 (.NET CLR 3.5.30728)"},
-                             timeout=50,
+                             headers={"User-Agent": "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.9) Gecko/20100722 Firefox/3.6.7 GTB7.1 (.NET CLR 3.5.30729)"},
+                             timeout=30,
                              stream=True
                          )
         except ProxyError, e:
@@ -80,14 +74,6 @@ def search_query(query):
     #     embed()
     # except SearchError, e:
     #     print "Search failed: %s" % e
-
-
-def search(query):
-    c = Connection()
-    result = c.make_request("http://www.google.com/search", params={'as_epq': query,
-                             "tbs": "qdr:a"})
-    print "conection made: " + result.url
-    return get_result_stats(result)
 
 
 def get_result_stats(result):
