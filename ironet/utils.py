@@ -96,6 +96,7 @@ def get_num_results(query):
     number = number.replace(".", "")
     number = number.replace(",", "")
     number = number.replace(" ", "")
+    number = number.replace("\'", "")
     return int(number)
 
 
