@@ -86,7 +86,7 @@ def get_result_stats(result):
 def get_num_results(query):
 
     query = query.replace("_", " ")
-    #print query
+    print query
     text = search_query(query)
     if text[0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
         number = text.split(" ")[0]
