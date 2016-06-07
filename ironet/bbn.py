@@ -63,9 +63,10 @@ def f_affect(ironic, affect):
 
 def main():
 
-    data = SimileData()
+    #data = SimileData()
 
-    data.parse_similes()
+    #data.parse_similes()
+    utils.search_query("hallo")
     #
     # g = build_bbn(
     #     f_irony,
