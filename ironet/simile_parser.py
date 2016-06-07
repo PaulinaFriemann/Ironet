@@ -22,6 +22,11 @@ class Simile:
         else:
             self.ironic = False
 
+        if self.vehicle[0] in ['a', 'e', 'i', 'o', 'u']:
+            self.an = True
+        else:
+            self.an = False
+
         self.synonyms = [self.ground]
         #self.get_synonyms()
 
@@ -59,8 +64,8 @@ class Simile:
         print self.name() + irony
 
     def name(self):
-
-        return "as " + self.ground + " as ~a " + self.vehicle
+        a = "an " if self.an else "a "
+        return "as " + self.ground + " as " + a + self.vehicle
 
     def get_synonyms(self):
 

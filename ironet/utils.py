@@ -77,6 +77,7 @@ def search_query(query):
 
 
 def get_result_stats(result):
+    #print result.url
     soup = BeautifulSoup(result.text, "html.parser")
 
     # gets the number of search results
@@ -88,6 +89,7 @@ def get_num_results(query):
     query = query.replace("_", " ")
     print query
     text = search_query(query)
+    #print "text " + text
     if text[0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
         number = text.split(" ")[0]
     else:
