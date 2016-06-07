@@ -1,8 +1,11 @@
-from nltk.corpus import wordnet as wn
+#from nltk.corpus import wordnet as wn
 import requests
+import sys
 from bs4 import BeautifulSoup
-from xgoogle.search import GoogleSearch, SearchError
-from IPython import embed
+#from xgoogle.search import GoogleSearch, SearchError
+#from IPython import embed
+import time
+from requests.exceptions import ProxyError
 
 
 def get_num_results(query):
@@ -16,18 +19,33 @@ def get_num_results(query):
 
 def search_query(query):
     while True:
-
-        r = requests.get('http://www.google.com/search',
-                         params={'as_epq': query,
-                                 "tbs": "qdr:a"}
-                     )
-        if str(r.url).startswith("http://ipv4.google.com/sorry/IndexRedirect?"):
-            print "wtf " + r.url
-            raw_input("Tell me when it is over...")
+        try:
+            r = requests.get('http://www.google.com/search',
+                             params={'as_epq': query,
+                                     "tbs": "qdr:a"},
+                             proxies={"http": "http://128.72.17.44:8080"},
+                             headers={"User-Agent": "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8 GTB7.1 (.NET CLR 3.5.30729)"},
+                             timeout=50,
+                             stream=True
+                         )
+        except ProxyError, e:
+            print "shit ", e
+        except:
+            print("Unexpected error:", sys.exc_info()[0])
+            raise
         else:
-            soup = BeautifulSoup(r.text, "html.parser")
-            # gets the number of search results
-            return soup.find('div', {'id': 'resultStats'}).text
+
+            print r.url
+            print r.raw._fp.fp._sock.getpeername()
+            print r.content
+
+            if str(r.url).startswith("http://ipv6.google.com/sorry/IndexRedirect?") or str(r.url).startswith("http://ipv4.google.com/sorry/IndexRedirect?"):
+                print "wtf " + r.url
+                raw_input("Tell me when it is over...")
+            else:
+                soup = BeautifulSoup(r.text, "html.parser")
+                # gets the number of search results
+                return soup.find('div', {'id': 'resultStats'}).text
 
     # try:
     #     gs = GoogleSearch("as dumb as a brick")
@@ -64,12 +82,12 @@ class Simile:
         return False
 
     def determine_frequencies(self):
-        with open('../res/aboutfrequency.txt', 'r+') as f:
+        with open('../res/aboutfrequency.txt', 'a') as f:
 
             self.wo_frequency = get_num_results(self.name())
             self.w_frequency = get_num_results("about " + self.name())
 
-            f.writelines(str(self.wo_frequency) + " " + str(self.w_frequency))
+            f.write(str(self.wo_frequency) + " " + str(self.w_frequency) + "\n")
 
         f.close()
 
@@ -117,6 +135,9 @@ class SimileData:
 
             with open('../res/aboutfrequency.txt', 'r+') as frequ_file:
 
+                self.queried_similes = 0
+                end_reached = False
+
                 for line in f:
                     words = line.split(" ")
                     adjective, vehicle, irony = words[1], words[4], words[5].rstrip('\n')
@@ -126,15 +147,27 @@ class SimileData:
                     self.number += 1
                     self.similes.append(simile)
 
-                    frequencies = frequ_file.readline()
+                    if not end_reached:
+                        frequencies = frequ_file.readline()
+                    else:
+                        frequencies = ''
                     if frequencies != '':
+                        self.queried_similes += 1
+                        frequencies = frequencies.replace("\n", "")
                         frequencies = frequencies.split(" ")
                         wo_frequ = int(frequencies[0])
                         w_frequ = int(frequencies[1])
                         simile.set_frequencies(wo_frequ, w_frequ)
-                        print simile.name() + " " + str(wo_frequ) + " " + str(w_frequ)
                     else:
+                        end_reached = True
                         simile.determine_frequencies()
+                        self.queried_similes += 1
+                        time.sleep(1)
+
+                    print self.queried_similes
+
+                    #if len(self.similes) == 10:
+                        #break
 
         frequ_file.close()
         f.close()

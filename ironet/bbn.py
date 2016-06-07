@@ -2,9 +2,9 @@
 
 from bayesian.bbn import *
 from simile_parser import *
-from IPython import embed
-from nltk.corpus import wordnet as wn
-from nltk.corpus import lin_thesaurus as lin
+#from IPython import embed
+#from nltk.corpus import wordnet as wn
+#from nltk.corpus import lin_thesaurus as lin
 from itertools import chain
 
 
