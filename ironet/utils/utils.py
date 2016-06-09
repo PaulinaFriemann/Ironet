@@ -89,7 +89,7 @@ def get_num_results(query):
     query = query.replace("_", " ")
     print query
     text = search_query(query)
-    #print "text " + text
+    print "text " + text
     if text[0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
         number = text.split(" ")[0]
     else:
@@ -99,22 +99,5 @@ def get_num_results(query):
     number = number.replace(",", "")
     number = number.replace(" ", "")
     number = number.replace("\'", "")
+
     return int(number)
-
-
-def create_no_dubs(self):
-    with open('../res/Similes.txt', 'r+') as f:
-        with open('../res/SimilesNoDups.txt', 'r+') as f_no_dups:
-
-            f_no_dups.truncate()
-
-            seen = set()
-
-            for line in f:
-                if line not in seen:
-                    seen.add(line)
-                    f_no_dups.write(line)
-
-    f.close()
-
-    f_no_dups.close()

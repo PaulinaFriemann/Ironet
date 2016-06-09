@@ -17,6 +17,7 @@ def f_irony(ironic):
 
 def f_morphological_similarity(similar, ironic):
     """
+    Step 1
     Is there a lexical similarity between vehicle and ground or related words?
     :param similar: morphological similarity?
     :param ironic: truth value of irony
@@ -47,6 +48,39 @@ def f_about_frequency(about_dominant, ironic):
             return 0
         else:
             return 1
+
+
+def f_such_as(such_as, ironic):
+    """
+    Step 5:
+    Is there a "GROUND * such as VEHICLE" found on the web? (or here: Wikipedia)
+    """
+    if ironic:
+        if such_as:
+            return 0
+        else:
+            return 1
+    else:
+        if such_as:
+            return 1
+        else:
+            return 0
+
+
+def f_web_frequency(high_web_frequ, ironic):
+    """
+    Step 8 and 9: Is the web-frequency >= 10? -> non-ironic
+    """
+    if ironic:
+        if high_web_frequ:
+            return 0
+        else:
+            return 1
+    else:
+        if high_web_frequ:
+            return 1
+        else:
+            return 0
 
 
 def f_affect(ironic, affect):
