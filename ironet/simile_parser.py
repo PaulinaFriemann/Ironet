@@ -5,6 +5,7 @@ import sys
 import time
 import utils.utils as utils
 import random
+import os
 
 
 class SimileProperties:
@@ -12,10 +13,31 @@ class SimileProperties:
     def __init__(self):
         self.frequency = 0
         self.about_frequency = 0
+        self.such_as = False
 
     def set_frequencies(self, frequency, with_frequency):
         self.frequency = frequency
         self.about_frequency = with_frequency
+
+    def about_predominant(self):
+        return self.about_frequency > 0.5 * self.frequency
+
+    def high_web_frequency(self):
+        return self.frequency >= 10
+
+    def such_as(self):
+        return self.such_as
+
+    def determine_such_as(self):
+        #TODO
+        pass
+
+    def determine_frequencies(self, name):
+        self.frequency = utils.get_num_results(name)
+        self.about_frequency = utils.get_num_results("about " + name)
+
+        if self.about_frequency > self.frequency:
+            self.about_frequency = 0
 
 
 class Simile:
@@ -51,34 +73,6 @@ class Simile:
 
         return False
 
-    def high_web_frequ(self):
-        return self.w_frequency >= 10
-
-    def determine_such_as(self):
-        self.such_as_vehicle = False
-
-    def such_as_vehicle(self):
-        return self.such_as_vehicle
-
-    def determine_frequencies(self):
-        #with open('../res/aboutfrequency.txt', 'a') as f:
-
-        self.wo_frequency = utils.get_num_results(self.name())
-        self.w_frequency = utils.get_num_results("about " + self.name())
-
-        if self.w_frequency > self.wo_frequency:
-            self.w_frequency = 0
-
-        print str(self.wo_frequency) + " " + str(self.w_frequency)
-
-        return str(self.wo_frequency) + " " + str(self.w_frequency) + "\n"
-
-            #f.write(str(self.wo_frequency) + " " + str(self.w_frequency) + "\n")
-
-
-    def about_predominant(self):
-        return self.w_frequency > 0.5 * self.wo_frequency
-
     def print_simile(self):
         irony = " (ironic)" if self.ironic else " (honest)"
         print self.name() + irony
@@ -104,8 +98,15 @@ class Simile:
                         self.synonyms.append(name)
 
     def set_frequencies(self, wo_frequ, w_frequ):
-        self.wo_frequency = wo_frequ
-        self.w_frequency = w_frequ
+        self.properties.frequency = wo_frequ
+        self.properties.about_frequency = w_frequ
+
+    def determine_stuff(self):
+        self.properties.determine_frequencies(self.name())
+        self.properties.determine_such_as()
+
+    def get_frequencies(self):
+        return str(self.properties.frequency) + " " + str(self.properties.about_frequency) + "\n"
 
 
 class SimileData:
@@ -114,6 +115,27 @@ class SimileData:
         self.similes = []
         self.number = 0
         self.num_ironics = 0
+
+    def parse_new_similes(self):
+        os.system("vngate.py " + utils.countries[utils.countrynr])
+        lines = []
+
+        similes = open('../res/SimilesNoDups.txt', 'r')
+
+        with open('../res/nounderscores.txt', 'a') as new_file:
+
+            queried_similes = 0
+
+            for line in new_file:
+                similes.readline()
+
+            for line in similes:
+                simile = Simile.from_phrase(line)
+                simile.determine_stuff()
+                line = line.rstrip("\n")
+                new_file.write(line + ";" + simile.get_frequencies())
+
+        similes.close()
 
     def parse_similes(self):
         lines = []
@@ -149,8 +171,6 @@ class SimileData:
                         new.write(line)
 
         new.close()
-
-
 
     def bs_parse(self):
         frequs = []

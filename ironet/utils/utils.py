@@ -5,7 +5,7 @@ import math
 import time
 import sys
 from functools import wraps
-
+import os
 
 def retry(tries, delay=0.1, backoff=2):
 
@@ -42,9 +42,19 @@ def retry(tries, delay=0.1, backoff=2):
         return f_retry  # true decorator -> decorated function
     return deco_retry  # @retry(arg[, ...]) -> true decorator
 
+countrynr = 0
+
+countries = ["US", "Japan", "Korea", "Thailand", "Russia", "India", "Hong Kong",
+             "Brazil", "Malaysia", "Taiwan", "Indonesia", "Poland", "Philippines", "Curacao", "Algeria",
+             "Iran", "Spain", "Germany", "Viet", "Venezuela", "United Kingdom", "Ukraine",
+             "Tunisia", "Italy", "China", "Morocco", "Mexico", "Austria"]
 
 @retry(tries=4)
 def search_query(query):
+    global countrynr
+
+    global countries
+
     while True:
         try:
             r = requests.get('http://www.google.com/search',
@@ -57,6 +67,7 @@ def search_query(query):
                          )
         except ProxyError, e:
             print "shit ", e
+
         except:
             print("Unexpected error:", sys.exc_info()[0])
             raise
@@ -64,7 +75,9 @@ def search_query(query):
 
             if str(r.url).startswith("http://ipv6.google.com/sorry/IndexRedirect?") or str(r.url).startswith("http://ipv4.google.com/sorry/IndexRedirect?"):
                 print "got kicked out"
-                raise Exception
+                raise
+                #countrynr += 1
+                #os.system("vngate.py " + countries[countrynr])
             else:
                 return get_result_stats(r)
 
@@ -88,7 +101,11 @@ def get_num_results(query):
 
     query = query.replace("_", " ")
     print query
-    text = search_query(query)
+    try:
+        text = search_query(query)
+    except ProxyError:
+        countrynr += 1
+        os.system("vngate.py " + countries[countrynr])
     print "text " + text
     if text[0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
         number = text.split(" ")[0]
