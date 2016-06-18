@@ -1,4 +1,5 @@
 from nltk.corpus import wordnet as wn
+import pickle
 
 
 def find_synonyms(word, wn_type):
@@ -46,14 +47,17 @@ class Ground:
     def __init__(self, name):
         self.name = name
         self.codescriptors = []
-        self.synonyms = []
+        self.synonyms = [name]
         self.antonyms = []
+
+        self.get_synonyms()
+        self.get_antonyms()
 
     def add_codescriptor(self, codescriptor):
         self.codescriptors.append(codescriptor)
 
     def get_synonyms(self):
-        self.synonyms = find_synonyms(self.name, wn.ADJ)
+        self.synonyms += find_synonyms(self.name, wn.ADJ)
 
     def get_antonyms(self):
         self.antonyms = find_antonyms(self.name)
@@ -63,13 +67,18 @@ class Vehicle:
     def __init__(self, name):
         self.name = name
         self.attributes = []
-        self.synonyms = []
+        self.synonyms = [self]
+
+        self.get_synonyms()
 
     def add_attribute(self, attribute):
         self.attributes.append(attribute)
 
+    def has_attribute(self, attribute):
+        return attribute in self.attributes
+
     def get_synonyms(self):
-        self.synonyms = find_synonyms(self.name, wn.NOUN)
+        self.synonyms += find_synonyms(self.name, wn.NOUN)
 
 
 class Singleton(type):
@@ -85,8 +94,9 @@ class WordDatabase:
     __metaclass__ = Singleton
 
     def __init__(self):
-        self.grounds = dict()
-        self.vehicles = dict()
+        self.grounds = None
+        self.vehicles = None
+        self.load()
 
     def add_ground(self, ground):
         self.grounds[ground] = Ground(ground)
@@ -101,13 +111,23 @@ class WordDatabase:
         return self.vehicles[name]
 
     def load(self):
-        self.grounds = self.load_grounds()
-        self.vehicles = self.load_vehicles()
+        self.load_grounds()
+        self.load_vehicles()
 
     def load_grounds(self):
-        # TODO
-        pass
+        f = open('../res/pdata/database/grounds.txt', 'rb')
+        self.grounds = pickle.load()
+        f.close()
 
     def load_vehicles(self):
-        # TODO
-        pass
+        f = open('../res/pdata/database/vehicles.txt', 'rb')
+        self.vehicles = pickle.load()
+        f.close()
+
+    def save(self):
+        f = open('../res/pdata/database/grounds.txt', 'wb')
+        pickle.dump(self.grounds)
+        f.close()
+        f = open('../res/pdata/database/vehicles.txt', 'wb')
+        pickle.dump(self.vehicles)
+        f.close()

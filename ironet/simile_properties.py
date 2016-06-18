@@ -20,3 +20,10 @@ def about_dominant(simile):
 def high_web_frequency(simile):
     return int(simile.frequency) >= 10
 
+
+def such_as(simile):
+    for ground in simile.ground.synonyms:
+        for vehicle in simile.vehicle.synonyms:
+            if vehicle.has_attribute(ground):
+                return True
+    return False
