@@ -1769,7 +1769,7 @@ as light as a smile h;3 0
 as light as a cotton_ball h;7450 0
 as light as a membrane h;2660000 1920000
 as light as a sponge_cake h;3740 0
-as light as a skyscraper i;988000 1
+as light as a skyscraper i;0 1
 as light as a pickup_truck i;2 0
 as light as a sledgehammer i;2 1
 as lovely as a rice_paper h;884 0

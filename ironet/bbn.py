@@ -1,17 +1,12 @@
 """Bayesian network for irony detection"""
 
-from bayesian.bbn import *
-from simile_parser import *
-#from IPython import embed
-#from nltk.corpus import wordnet as wn
-#from nltk.corpus import lin_thesaurus as lin
-from itertools import chain
-
 
 def f_irony(ironic):
     if ironic:
         return 0.18
+        #return 0.5
     else:
+        #return 0.5
         return 0.82
 
 
@@ -24,14 +19,14 @@ def f_morphological_similarity(similar, ironic):
     """
     if ironic:
         if similar:
-            return 0
+            return 0.0067
         else:
-            return 1
+            return 0.993
     else:
         if similar:
-            return 1
+            return 0.02348
         else:
-            return 0
+            return 0.97651
 
 
 def f_about_frequency(about_dominant, ironic):
@@ -40,31 +35,48 @@ def f_about_frequency(about_dominant, ironic):
     """
     if ironic:
         if about_dominant:
-            return 1
+            return 0.279
         else:
-            return 0
+            return 0.721
     else:
         if about_dominant:
-            return 0
+            return 0.038
         else:
-            return 1
+            return 0.962
 
 
 def f_such_as(such_as, ironic):
     """
-    Step 5:
+    Step 5 and 6:
     Is there a "GROUND * such as VEHICLE" found on the web? (or here: Wikipedia)
     """
     if ironic:
         if such_as:
-            return 0
+            return 0.09
         else:
-            return 1
+            return 0.91
     else:
         if such_as:
-            return 1
+            return 0.17
         else:
-            return 0
+            return 0.83
+
+
+def f_inverse_variation(inverse_var, ironic):
+    """
+    Step 7:
+    Is the simile an inverse variation of a non-ironic simile?
+    """
+    if ironic:
+        if inverse_var:
+            return 0.19
+        else:
+            return 0.81
+    else:
+        if inverse_var:
+            return 0.26
+        else:
+            return 0.74
 
 
 def f_web_frequency(high_web_frequ, ironic):
@@ -73,79 +85,13 @@ def f_web_frequency(high_web_frequ, ironic):
     """
     if ironic:
         if high_web_frequ:
-            return 0
+            return 0.453
         else:
-            return 1
+            return 0.547
     else:
         if high_web_frequ:
-            return 1
+            return 0.6
         else:
-            return 0
+            return 0.4
 
 
-def f_affect(ironic, affect):
-    if ironic:
-        if affect >= 2.28:
-            return 0.14
-        elif affect <= 1.36:
-            return 123
-        else:
-            pass
-    else:
-        pass
-
-
-def main():
-
-    data = SimileData()
-
-    data.parse_similes()
-
-    #
-    # g = build_bbn(
-    #     f_irony,
-    #     f_about_frequency,
-    #     domains=dict(
-    #         ironic=[True, False],
-    #         similar=[True, False]
-    #     )
-    # )
-    #
-    # similes = [Simile('pretty', 'warthog', 'i'), Simile('manly', 'man', 'h')]
-    #
-    # honest = []
-    # ironic = []
-    #
-    # correctly_categorized_honest = 0
-    # correctly_categorized_ironic = 0
-    # falsely_categorized_ironic = 0
-    # falsely_categorized_honest = 0
-    #
-    # for simile in data.similes:
-    #     result = g.query(similar=simile.about_predominant())
-    #     if result[('ironic', True)] == 1:
-    #         ironic.append(simile.name())
-    #         if simile.ironic:
-    #             correctly_categorized_ironic += 1
-    #         else:
-    #             falsely_categorized_ironic += 1
-    #     else:
-    #         honest.append(simile.name())
-    #         if not simile.ironic:
-    #             correctly_categorized_honest += 1
-    #         else:
-    #             falsely_categorized_honest += 1
-    #
-    # print honest
-    # print ironic
-    #
-    # print correctly_categorized_honest
-    # print falsely_categorized_honest
-    # print correctly_categorized_ironic
-    # print falsely_categorized_ironic
-
-
-    #embed()
-
-if __name__ == '__main__':
-    main()

@@ -1,11 +1,14 @@
 import requests
-from requests.exceptions import ProxyError
+from requests.exceptions import ProxyError, ConnectionError
 from bs4 import BeautifulSoup
 import math
 import time
 import sys
 from functools import wraps
 import os
+import multiprocessing
+import re
+
 
 def retry(tries, delay=0.1, backoff=2):
 
@@ -49,7 +52,7 @@ countries = ["US", "Japan", "Korea", "Thailand", "Russia", "India", "Hong Kong",
              "Iran", "Spain", "Germany", "Viet", "Venezuela", "United Kingdom", "Ukraine",
              "Tunisia", "Italy", "China", "Morocco", "Mexico", "Austria"]
 
-@retry(tries=4)
+
 def search_query(query):
     global countrynr
 
@@ -68,6 +71,9 @@ def search_query(query):
         except ProxyError, e:
             print "shit ", e
 
+        except ConnectionError, e:
+            print "bla", e
+
         except:
             print("Unexpected error:", sys.exc_info()[0])
             raise
@@ -75,7 +81,7 @@ def search_query(query):
 
             if str(r.url).startswith("http://ipv6.google.com/sorry/IndexRedirect?") or str(r.url).startswith("http://ipv4.google.com/sorry/IndexRedirect?"):
                 print "got kicked out"
-                raise
+                raise ProxyError
                 #countrynr += 1
                 #os.system("vngate.py " + countries[countrynr])
             else:
@@ -92,20 +98,44 @@ def search_query(query):
 def get_result_stats(result):
     #print result.url
     soup = BeautifulSoup(result.text, "html.parser")
+    #print soup.findAll(attrs={'href' : re.compile("$search$")})
 
     # gets the number of search results
     return soup.find('div', {'id': 'resultStats'}).text
 
+first = True
+p = None
 
+
+def init():
+    global p
+    p = multiprocessing.Process(target=os.system("python C:/Users/Paulina/PycharmProjects/Ironet2.0/ironet/utils/vpngate.py " + countries[countrynr]))
+    p.start()
+
+
+@retry(tries=4)
 def get_num_results(query):
+
+    global first
+    global p
+
+    #if first:
+        #init()
 
     query = query.replace("_", " ")
     print query
     try:
         text = search_query(query)
     except ProxyError:
-        countrynr += 1
-        os.system("vngate.py " + countries[countrynr])
+        print "had error, change proxy "
+        raise
+      #  countrynr += 1
+      #  p.terminate()
+       # try:
+           # p = multiprocessing.Process("vngate.py " + countries[countrynr])
+          #  p.start()
+     #   except IndexError:
+   #         print "out of countries.."
     print "text " + text
     if text[0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
         number = text.split(" ")[0]
