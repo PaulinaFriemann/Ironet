@@ -1,4 +1,5 @@
 import pickle
+import os
 
 bytes_processed = 0
 gb_processed = 0
@@ -15,7 +16,6 @@ def peek_line(f, k=10):
 
 
 def get_k_words(f, k=10):
-
     global bytes_processed
     global gb_processed
 
@@ -76,6 +76,63 @@ def get_all_synonyms():
     p_vehicles.close()
 
     return grounds, vehicles
+
+
+def get_all_such():
+
+    def last_chars(f, pos):
+        try:
+            f.seek(pos - 35)
+        except IOError, e:
+            print pos
+            print "IOERROR" + " " + str(e)
+            f.seek(0)
+        chars = ""
+        while f.tell() != pos:
+            chars += f.read(1)
+        return chars
+
+    def next_chars(f):
+        words = " "
+        for i in range(6):
+            words += next_word(f)
+        return words
+
+    def next_word(f):
+        global bytes_processed
+        global gb_processed
+
+        word = ''
+        next_char = 'dummy'
+
+        while next_char != ' ' and next_char != '':
+            next_char = f.read(1)
+            bytes_processed += 1
+            word += next_char
+
+        if bytes_processed >= 1073741824:
+            bytes_processed = 0
+            gb_processed += 1
+            print gb_processed
+
+        return word
+
+    with open('../res/wiki/allsuchas.txt', 'w') as f:
+        with open('E:/Documents/Workspace/wikitext.txt', 'r') as wikitext:
+
+            word = ' '
+
+            while word != '':
+                word = next_word(wikitext)
+                #print word
+                if word == "such ":
+                    next_w = next_word(wikitext)
+                    if next_w == "as ":
+                        #print "sSZCHG ASSS!!!"
+
+                        chars = last_chars(wikitext, wikitext.tell()) + next_chars(wikitext)
+
+                        f.write(chars + "\n")
 
 
 def all_such_as():
