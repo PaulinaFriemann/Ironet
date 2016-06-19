@@ -25,9 +25,9 @@ def query(simile, g, web_frequ=False, about=False, similarity=False, such_as=Fal
     return result[('ironic', True)] >= result[('ironic', False)]
 
 
-def mainb():
-    data = SimileData()
-    data.load_data()
+def main():
+    #data = SimileData()
+    #data.load_data()
     #text_utils.get_not_done(data)
     #get_all_inverses(data)
     #text_utils.pickle_inverses(data)
@@ -35,9 +35,10 @@ def mainb():
    #text_utils.get_frequencies()
     #get_inverse_frequency(data)
     #print data.similes[0].inverses[0].frequency
+    text_utils.get_all_such()
 
 
-def main():
+def mainb():
 
     data = SimileData()
     data.load_data()
