@@ -47,7 +47,7 @@ class Ground:
     def __init__(self, name):
         self.name = name
         self.codescriptors = []
-        self.synonyms = [name]
+        self.synonyms = [self.name]
         self.antonyms = []
 
         self.get_synonyms()
@@ -67,7 +67,7 @@ class Vehicle:
     def __init__(self, name):
         self.name = name
         self.attributes = []
-        self.synonyms = [self]
+        self.synonyms = [self.name]
 
         self.get_synonyms()
 
@@ -94,8 +94,8 @@ class WordDatabase:
     __metaclass__ = Singleton
 
     def __init__(self):
-        self.grounds = None
-        self.vehicles = None
+        self.grounds = dict()
+        self.vehicles = dict()
         self.load()
 
     def add_ground(self, ground):
@@ -116,18 +116,18 @@ class WordDatabase:
 
     def load_grounds(self):
         f = open('../res/pdata/database/grounds.txt', 'rb')
-        self.grounds = pickle.load()
+        self.grounds = pickle.load(f)
         f.close()
 
     def load_vehicles(self):
         f = open('../res/pdata/database/vehicles.txt', 'rb')
-        self.vehicles = pickle.load()
+        self.vehicles = pickle.load(f)
         f.close()
 
     def save(self):
         f = open('../res/pdata/database/grounds.txt', 'wb')
-        pickle.dump(self.grounds)
+        pickle.dump(self.grounds, f)
         f.close()
         f = open('../res/pdata/database/vehicles.txt', 'wb')
-        pickle.dump(self.vehicles)
+        pickle.dump(self.vehicles, f)
         f.close()
