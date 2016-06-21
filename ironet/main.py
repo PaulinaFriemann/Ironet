@@ -3,6 +3,8 @@ from bayesian.bbn import *
 import bbn
 from simile import *
 
+from words import WordDatabase
+import utils.text_utils as tu
 
 def simulate_inverse(simile, g):
 
@@ -26,6 +28,9 @@ def query(simile, g, web_frequ=False, about=False, similarity=False, such_as=Fal
 
 
 def main():
+    pass
+    #data.load()
+    #print data.get_ground("awkward")
     #data = SimileData()
     #data.load_data()
     #text_utils.get_not_done(data)
@@ -35,7 +40,7 @@ def main():
    #text_utils.get_frequencies()
     #get_inverse_frequency(data)
     #print data.similes[0].inverses[0].frequency
-    text_utils.get_all_such()
+    #text_utils.get_all_such()
 
 
 def mainb():

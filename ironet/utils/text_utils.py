@@ -1,5 +1,7 @@
 import pickle
 import os
+#from ironet.words import *
+from nltk.corpus import wordnet as wn
 
 bytes_processed = 0
 gb_processed = 0
@@ -78,6 +80,76 @@ def get_all_synonyms():
     return grounds, vehicles
 
 
+def next_word(f):
+    global bytes_processed
+    global gb_processed
+
+    word = ''
+    next_char = 'dummy'
+
+    while next_char != ' ' and next_char != '':
+        next_char = f.read(1)
+        bytes_processed += 1
+        word += next_char
+
+    if bytes_processed >= 1073741824:
+        bytes_processed = 0
+        gb_processed += 1
+        print gb_processed
+
+    return word
+
+
+def get_codescriptors():
+    import sys
+    sys.path.insert(1, '../')
+
+    import ironet.words
+
+    data = ironet.words.WordDatabase()
+
+    with open('../res/wiki/alland.txt', 'r') as f:
+        for line in f:
+            words = line.split(" ")
+            for ground in data.grounds.keys():
+                other = ""
+                if words[1] == ground:
+                    other = words[3]
+
+                elif words[3] == ground:
+                    other = words[1]
+
+                if wn.synsets(other, wn.ADJ):
+                    print "adj " + other
+                    g = data.get_ground(ground)
+                    g.add_codescriptor(other)
+                elif other != "":
+                    print "no adj " + other
+    data.save()
+
+
+def get_ground_and():
+
+    with open('../res/wiki/alland.txt', 'w') as f:
+        with open('E:/Documents/Workspace/wikitext.txt', 'r') as wikitext:
+
+            word = ' '
+            last_word = ''
+            while word != '':
+                word = next_word(wikitext)
+                # print word
+                if word == "as ":
+                    next_w = next_word(wikitext)
+                    nextnext_w = next_word(wikitext)
+                    if nextnext_w == "and ":
+
+                        nextnextnext_w = next_word(wikitext)
+
+                        if next_word(wikitext) == "as ":
+                            #print word + next_w + nextnext_w + nextnextnext_w + "as "
+                            f.write(word + next_w + nextnext_w + nextnextnext_w + "as\n")
+
+
 def get_all_such():
 
     def last_chars(f, pos):
@@ -97,25 +169,6 @@ def get_all_such():
         for i in range(6):
             words += next_word(f)
         return words
-
-    def next_word(f):
-        global bytes_processed
-        global gb_processed
-
-        word = ''
-        next_char = 'dummy'
-
-        while next_char != ' ' and next_char != '':
-            next_char = f.read(1)
-            bytes_processed += 1
-            word += next_char
-
-        if bytes_processed >= 1073741824:
-            bytes_processed = 0
-            gb_processed += 1
-            print gb_processed
-
-        return word
 
     with open('../res/wiki/allsuchas.txt', 'w') as f:
         with open('E:/Documents/Workspace/wikitext.txt', 'r') as wikitext:
