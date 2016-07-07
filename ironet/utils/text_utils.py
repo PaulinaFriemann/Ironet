@@ -2,6 +2,7 @@ import pickle
 import os
 #from ironet.words import *
 from nltk.corpus import wordnet as wn
+from words import *
 
 bytes_processed = 0
 gb_processed = 0
@@ -251,6 +252,38 @@ def all_such_as():
                 lastline = line.split(" ")[:-1]
 
 
+def get_attributes():
+    wd = WordDatabase()
+
+    for vehicle in wd.vehicles.keys():
+        if not wn.synsets(vehicle, wn.NOUN):
+            del wd.vehicles[vehicle]
+
+    for ground in wd.grounds.keys():
+        if not wn.synsets(ground, wn.ADJ):
+            del wd.grounds[ground]
+
+    with open('../res/wiki/allsuchas.txt', 'r') as f:
+
+        for line in f:
+            split_line = line.split(" such as ")
+            left_side = split_line[0]
+            right_side = split_line[1]
+
+            for ground in wd.grounds.keys():
+                ground_temp = " " + ground + " "
+                if ground_temp.replace("_", " ") in left_side:
+                    for vehicle in wd.vehicles.keys():
+                        vehicle_temp = " " + vehicle + " "
+                        if vehicle_temp.replace("_", " ") in right_side:
+
+                            wd.get_vehicle(vehicle).add_attribute(wd.get_ground(ground))
+                            print str(vehicle) + " " + str(ground) + "  ... " + line
+
+
+    wd.save()
+
+
 def ground_such_as_vehicle():
     """
     checks if something like "GROUND * such as * VEHICLE" is in wikipedia and writes lines to file
@@ -308,45 +341,6 @@ def pickle_inverses(data):
     f.close()
 
 
-def get_not_done(data):
-
-    alle = open_thing('C:/Users/Paulina/PycharmProjects/Ironet2.0/res/pdata/inverses.txt')
-
-    done = open_thing('C:/Users/Paulina/PycharmProjects/Ironet2.0/res/pdata/invwfrequ.txt')
-
-    not_done = []
-    #not_done = open_thing(not_done, 'C:/Users/Paulina/PycharmProjects/Ironet2.0/res/pdata/invnotdone.txt')
-    howmany = 0
-    for simile in alle:
-        if simile not in done:
-            howmany += 1
-            not_done.append(simile)
-    print howmany
-    dump(not_done, 'C:/Users/Paulina/PycharmProjects/Ironet2.0/res/pdata/invnotdone.txt')
-
-
-def get_frequencies():
-    inverses = open_thing('C:/Users/Paulina/PycharmProjects/Ironet2.0/res/pdata/invnotdone.txt')
-
-    done_inverses = open_thing('C:/Users/Paulina/PycharmProjects/Ironet2.0/res/pdata/invwfrequ.txt')
-
-    print len(inverses)
-    print len(done_inverses)
-
-    #done_inverses_names = [simile.name for simile in done_inverses]
-
-    for inverse in inverses:
-        inverse.initialise()
-        done_inverses.append(inverse)
-        inverses.remove(inverse)
-        #inverse.initialise()
-        dump(done_inverses, 'C:/Users/Paulina/PycharmProjects/Ironet2.0/res/pdata/invwfrequ.txt')
-        dump(inverses, 'C:/Users/Paulina/PycharmProjects/Ironet2.0/res/pdata/invnotdone.txt')
-
-    #dump(inverses, 'C:/Users/Paulina/PycharmProjects/Ironet2.0/res/pdata/invnotdone.txt')
-    #dump(done_inverses, 'C:/Users/Paulina/PycharmProjects/Ironet2.0/res/pdata/invwfrequ.txt')
-
-
 def dump(inverses, path):
     f = open(path, 'wb')
     pickle.dump(inverses, f)
@@ -359,17 +353,5 @@ def open_thing(path):
     f.close()
     return array
 
-
-def parse():
-    from ironet.simile import Simile
-    similes = []
-    with open('C:/Users/Paulina/PycharmProjects/Ironet2.0/res/inversefrequsINWORK.txt', 'r') as f:
-        for line in f:
-            print line
-            if line != "\n":
-                simile = Simile.from_line_no_irony(line)
-                similes.append(simile)
-
-    dump(similes, 'C:/Users/Paulina/PycharmProjects/Ironet2.0/res/pdata/invwfrequ.txt')
 
 

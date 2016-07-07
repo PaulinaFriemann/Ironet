@@ -2,57 +2,64 @@ from bayesian.bbn import *
 
 import bbn
 from simile import *
+import simile_properties as sp
+from query_utils import get_num_results
 
 from words import WordDatabase
 import utils.text_utils as tu
 
-def simulate_inverse(simile, g):
 
-    return query(simile.inverse, g, False, False, True, True, False)
+def simulate_inverse(simile, g, data):
+    print "inverse"
+    ironic_results = 0
+    for inverse in simile.inverses:
+        if query(inverse, g, data, False, False, True, True, False):
+            ironic_results += 1
+
+    return ironic_results >= len(simile.inverses)/2
 
 
-def query(simile, g, web_frequ=False, about=False, similarity=False, such_as=False, inverse=False):
+def query(simile, g, data, web_frequ=False, about=False, similarity=False, synonym_similar=False, codescr_similarity=False, such_as=False, inverse=False):
     params = {}
-    if web_frequ and simile.frequency != 0 and simile.frequency != "0":
-        params["high_web_frequ"] = simile.high_web_frequency()
+    print simile.key
+    if web_frequ:
+        params["high_web_frequ"] = sp.high_web_frequency(simile, data)
     if about:
-        params["about_dominant"] = simile.about_dominant()
+        params["about_dominant"] = sp.about_dominant(simile, data)
     if similarity:
-        params["similar"] = simile.morphological_similar()
+        params["similar"] = sp.morphological_similar(simile)
+    if synonym_similar:
+        params["synonym_similar"] = sp.synonym_similar(simile)
+    if codescr_similarity:
+        params["codescr_similar"] = sp.codescriptor_morph(simile)
     if such_as:
-        params["such_as"] = simile.such_as
-    if inverse and simile.inverse is not None:
-        params["inverse_var"] = simulate_inverse(simile, g)
+        params["such_as"] = sp.such_as(simile)
+    if inverse and simile.inverses is not None:
+        params["inverse_var"] = simulate_inverse(simile, g, data)
     result = g.query(**params)
     return result[('ironic', True)] >= result[('ironic', False)]
 
 
 def main():
-    pass
-    #data.load()
-    #print data.get_ground("awkward")
-    #data = SimileData()
-    #data.load_data()
-    #text_utils.get_not_done(data)
-    #get_all_inverses(data)
-    #text_utils.pickle_inverses(data)
-    #text_utils.parse()
-   #text_utils.get_frequencies()
-    #get_inverse_frequency(data)
-    #print data.similes[0].inverses[0].frequency
-    #text_utils.get_all_such()
+
+    tu.get_attributes()
 
 
 def mainb():
 
     data = SimileData()
     data.load_data()
+    #data.similes, data.ironic = parse_all()
+
+    print "build network"
 
     g = build_bbn(
         bbn.f_irony,
         bbn.f_web_frequency,
         bbn.f_about_frequency,
         bbn.f_morphological_similarity,
+        bbn.f_synonym_similar,
+        bbn.f_codescr_morph,
         bbn.f_such_as,
         bbn.f_inverse_variation,
         domains=dict(
@@ -60,10 +67,13 @@ def mainb():
             high_web_frequ=[True, False],
             about_dominant=[True, False],
             similar=[True, False],
+            synonym_similar=[True, False],
+            codescr_similar=[True, False],
             such_as=[True, False],
             inverse_var=[True, False]
         )
     )
+    print "done"
 
     honest = []
     ironic = []
@@ -75,24 +85,25 @@ def mainb():
 
     for simile in data.similes:
         include_inverse = False
-        if simile.inverse is not None:
+        if simile.inverses is not None:
             #if simile.inverse.frequency
             include_inverse = True
-        result = query(simile, g, True, True, True, True, inverse=include_inverse)
+        result = query(simile, g, data, web_frequ=True, about=True, similarity=True, synonym_similar=True, codescr_similarity=True, such_as=True, inverse=include_inverse)
         if result:
             ironic.append(simile.name + " i")
-            if simile.ironic:
-                print "ironic as ironic " + simile.name + " " + simile.get_frequencies()
+            if sp.ironic(simile, data):
+                #print "ironic as ironic " + simile.name + " " + simile.get_frequencies()
                 ironic_as_ironic += 1
             else:
-                print "honest as ironic " + simile.name + " " + simile.get_frequencies()
+                #print "honest as ironic " + simile.name + " " + simile.get_frequencies()
                 honest_as_ironic += 1
         else:
             honest.append(simile.name + " h")
-            if not simile.ironic:
+            if not sp.ironic(simile, data):
+                #print "honest as honest " + simile.name + " " + simile.get_frequencies()
                 honest_as_honest += 1
             else:
-                print "ironic as honest " + simile.name + " " + simile.get_frequencies()
+                #print "ironic as honest " + simile.name + " " + simile.get_frequencies()
                 ironic_as_honest += 1
 
     print honest_as_honest

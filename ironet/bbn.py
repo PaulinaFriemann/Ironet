@@ -29,20 +29,53 @@ def f_morphological_similarity(similar, ironic):
             return 0.97651
 
 
+def f_synonym_similar(synonym_similar, ironic):
+    if ironic:
+        if synonym_similar:
+            return 0.0055
+        else:
+            return 0.9945
+    else:
+        if synonym_similar:
+            return 0.02
+        else:
+            return 0.98
+
+
+# TODO test and get frequencies
+def f_codescr_morph(codescr_similar, ironic):
+    """
+    Step 1, c)
+    Is there a lexical similarity between vehicle and a codescriptor of the ground?
+    :param similar: morphological similarity?
+    :param ironic: truth value of irony
+    """
+    if ironic:
+        if codescr_similar:
+            return 0.00169
+        else:
+            return 0.99831
+    else:
+        if codescr_similar:
+            return 0.0011
+        else:
+            return 0.9989
+
+
 def f_about_frequency(about_dominant, ironic):
     """ Predominance of "about":
     Is the web frequency of "about as GROUND as a VEHICLE" more than half that of "as GROUND as VEHICLE" -> ironic
     """
     if ironic:
         if about_dominant:
-            return 0.279
+            return 0.32
         else:
-            return 0.721
+            return 0.68
     else:
         if about_dominant:
-            return 0.038
+            return 0.052
         else:
-            return 0.962
+            return 0.948
 
 
 def f_such_as(such_as, ironic):

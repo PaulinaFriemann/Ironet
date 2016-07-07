@@ -8,6 +8,7 @@ from functools import wraps
 import os
 import multiprocessing
 import re
+import string
 
 
 def retry(tries, delay=0.1, backoff=2):
@@ -53,7 +54,7 @@ countries = ["US", "Japan", "Korea", "Thailand", "Russia", "India", "Hong Kong",
              "Tunisia", "Italy", "China", "Morocco", "Mexico", "Austria"]
 
 
-def search_query(query):
+def search_query(query, vehicle):
     global countrynr
 
     global countries
@@ -85,7 +86,7 @@ def search_query(query):
                 #countrynr += 1
                 #os.system("vngate.py " + countries[countrynr])
             else:
-                return get_result_stats(r)
+                return get_result_stats(r, vehicle)
 
     # try:
     #     gs = GoogleSearch("as dumb as a brick")
@@ -95,9 +96,15 @@ def search_query(query):
     #     print "Search failed: %s" % e
 
 
-def get_result_stats(result):
+def get_result_stats(result, vehicle):
     #print result.url
     soup = BeautifulSoup(result.text, "html.parser")
+    bla = soup.find_all('b')
+    blastr = [blabla.string for blabla in bla]
+    if blastr.__contains__(vehicle.replace("_", " ")):
+        return '0'
+
+
     #print soup.findAll(attrs={'href' : re.compile("$search$")})
 
     # gets the number of search results
@@ -114,7 +121,7 @@ def init():
 
 
 @retry(tries=4)
-def get_num_results(query):
+def get_num_results(query, vehicle):
 
     global first
     global p
@@ -123,9 +130,9 @@ def get_num_results(query):
         #init()
 
     query = query.replace("_", " ")
-    print query
+    #print query
     try:
-        text = search_query(query)
+        text = search_query(query, vehicle)
     except ProxyError:
         print "had error, change proxy "
         raise
@@ -136,7 +143,7 @@ def get_num_results(query):
           #  p.start()
      #   except IndexError:
    #         print "out of countries.."
-    print "text " + text
+    print "text " + str(text)
     if text[0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
         number = text.split(" ")[0]
     else:
@@ -146,5 +153,6 @@ def get_num_results(query):
     number = number.replace(",", "")
     number = number.replace(" ", "")
     number = number.replace("\'", "")
+    number = number.strip(string.whitespace)
 
     return int(number)
