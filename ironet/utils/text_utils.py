@@ -179,8 +179,10 @@ def get_attributes():
                 ground_temp = " " + ground + " "
                 if ground_temp.replace("_", " ") in left_side:
                     for vehicle in wd.vehicles.keys():
-                        vehicle_temp = " " + vehicle + " "
-                        if vehicle_temp.replace("_", " ") in right_side:
+                        vehicle_temp = " a " + vehicle.replace("_", " ") + " "
+                        vehicle_plural = " " + vehicle.replace("_", " ") + "s "
+                        vehicle_temp = vehicle_temp.replace("_", " ")
+                        if vehicle_temp in right_side or vehicle_plural in right_side:
 
                             wd.get_vehicle(vehicle).add_attribute(wd.get_ground(ground))
                             print str(vehicle) + " " + str(ground) + "  ... " + line
