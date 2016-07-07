@@ -1,13 +1,10 @@
 from bayesian.bbn import *
 
 import bbn
-from simile import *
 import simile_properties as sp
-from query_utils import get_num_results
 
-from words import WordDatabase
 import utils.text_utils as tu
-
+from data import Data
 
 def simulate_inverse(simile, g, data):
     print "inverse"
@@ -42,13 +39,13 @@ def query(simile, g, data, web_frequ=False, about=False, similarity=False, synon
 
 def main():
 
-    tu.get_attributes()
+    da = Data()
 
 
 def mainb():
 
-    data = SimileData()
-    data.load_data()
+    data = Data()
+
     #data.similes, data.ironic = parse_all()
 
     print "build network"
