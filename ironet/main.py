@@ -6,23 +6,26 @@ import simile_properties as sp
 import utils.text_utils as tu
 from data import Data
 
-def simulate_inverse(simile, g, data):
+data = Data()
+
+
+def simulate_inverse(simile, g):
+    global data
     print "inverse"
     ironic_results = 0
-    for inverse in simile.inverses:
-        if query(inverse, g, data, False, False, True, True, False):
+    for inverse in data.inverses[simile]:
+        if query(inverse, g, False, False, True, True, False):
             ironic_results += 1
 
-    return ironic_results >= len(simile.inverses)/2
+    return ironic_results >= len(data.inverses[simile])/2
 
 
-def query(simile, g, data, web_frequ=False, about=False, similarity=False, synonym_similar=False, codescr_similarity=False, such_as=False, inverse=False):
+def query(simile, g, web_frequ=False, about=False, similarity=False, synonym_similar=False, codescr_similarity=False, such_as=False, inverse=False):
     params = {}
-    print simile.key
     if web_frequ:
-        params["high_web_frequ"] = sp.high_web_frequency(simile, data)
+        params["high_web_frequ"] = sp.high_web_frequency(simile)
     if about:
-        params["about_dominant"] = sp.about_dominant(simile, data)
+        params["about_dominant"] = sp.about_dominant(simile)
     if similarity:
         params["similar"] = sp.morphological_similar(simile)
     if synonym_similar:
@@ -31,24 +34,21 @@ def query(simile, g, data, web_frequ=False, about=False, similarity=False, synon
         params["codescr_similar"] = sp.codescriptor_morph(simile)
     if such_as:
         params["such_as"] = sp.such_as(simile)
-    if inverse and simile.inverses is not None:
-        params["inverse_var"] = simulate_inverse(simile, g, data)
+    if inverse and data.inverses[simile] is not None:
+        params["inverse_var"] = simulate_inverse(simile, g)
     result = g.query(**params)
     return result[('ironic', True)] >= result[('ironic', False)]
 
 
-def main():
+def mainb():
 
     da = Data()
 
 
-def mainb():
-
-    data = Data()
-
-    #data.similes, data.ironic = parse_all()
+def main():
 
     print "build network"
+    global data
 
     g = build_bbn(
         bbn.f_irony,
@@ -82,21 +82,21 @@ def mainb():
 
     for simile in data.similes:
         include_inverse = False
-        if simile.inverses is not None:
+        if data.inverses[simile] is not None:
             #if simile.inverse.frequency
             include_inverse = True
-        result = query(simile, g, data, web_frequ=True, about=True, similarity=True, synonym_similar=True, codescr_similarity=True, such_as=True, inverse=include_inverse)
+        result = query(simile, g, web_frequ=True, about=True, similarity=True, synonym_similar=True, codescr_similarity=True, such_as=True, inverse=include_inverse)
         if result:
-            ironic.append(simile.name + " i")
-            if sp.ironic(simile, data):
+            ironic.append(str(simile) + " i")
+            if sp.ironic(simile):
                 #print "ironic as ironic " + simile.name + " " + simile.get_frequencies()
                 ironic_as_ironic += 1
             else:
                 #print "honest as ironic " + simile.name + " " + simile.get_frequencies()
                 honest_as_ironic += 1
         else:
-            honest.append(simile.name + " h")
-            if not sp.ironic(simile, data):
+            honest.append(str(simile) + " h")
+            if not sp.ironic(simile):
                 #print "honest as honest " + simile.name + " " + simile.get_frequencies()
                 honest_as_honest += 1
             else:
@@ -108,8 +108,6 @@ def mainb():
     print ironic_as_ironic
     print honest_as_ironic
 
-    print "insgesamt: " + str(data.number)
-    print "davon ironisch " + str(data.num_ironics)
 
 if __name__ == '__main__':
     main()

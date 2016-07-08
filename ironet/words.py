@@ -1,5 +1,7 @@
+"""
+Word Types (Grounds and Vehicles)
+"""
 from nltk.corpus import wordnet as wn
-import pickle
 
 
 def find_synonyms(word, wn_type):
@@ -43,39 +45,45 @@ def find_antonyms(word):
     return antonyms
 
 
-class Ground:
-    def __init__(self, name):
+class Word:
+    """
+    Base class for words
+    """
+    def __init__(self, name, word_type):
         self.name = name
-        self.codescriptors = []
+        self.attributes = []
         self.synonyms = [self.name]
-        self.antonyms = []
+
+        self.wordType = word_type
 
         self.get_synonyms()
+
+    def get_synonyms(self):
+        self.synonyms += find_synonyms(self.name, self.wordType)
+
+
+class Ground(Word):
+    def __init__(self, name):
+        Word.__init__(name, wn.ADJ)
+        self.codescriptors = []
+        self.antonyms = []
+
         self.get_antonyms()
 
     def add_codescriptor(self, codescriptor):
         self.codescriptors.append(codescriptor)
 
-    def get_synonyms(self):
-        self.synonyms += find_synonyms(self.name, wn.ADJ)
-
     def get_antonyms(self):
         self.antonyms = find_antonyms(self.name)
 
 
-class Vehicle:
+class Vehicle(Word):
     def __init__(self, name):
-        self.name = name
+        Word.__init__(name, wn.NOUN)
         self.attributes = []
-        self.synonyms = [self.name]
-
-        self.get_synonyms()
 
     def add_attribute(self, attribute):
         self.attributes.append(attribute)
 
     def has_attribute(self, attribute):
         return attribute in self.attributes
-
-    def get_synonyms(self):
-        self.synonyms += find_synonyms(self.name, wn.NOUN)

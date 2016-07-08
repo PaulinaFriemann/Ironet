@@ -1,5 +1,7 @@
-import pickle
-import os
+"""
+Miscellaneous utils to work with text
+Functions to search Wikipedia Text
+"""
 from data import Data
 from nltk.corpus import wordnet as wn
 
@@ -18,35 +20,40 @@ def peek_line(f, k=10):
 
 
 def get_k_words(f, k=10):
-    global bytes_processed
-    global gb_processed
+    """
+    reads the next k words from a file
+    :param f: file to read from (opened)
+    :param k: number of words to read
+    :return: next k words, un a string joint with white spaces
+    """
 
-    num_space = 0
     words = ' '
 
-    while num_space < k:
-        char = f.read(1)
-        bytes_processed += 1
-        words += char
-        if char == ' ':
-            num_space += 1
-
-    if bytes_processed >= 1073741824:
-        bytes_processed = 0
-        gb_processed += 1
-        print gb_processed
+    for i in range(k):
+        words += next_word(f) + " "
 
     if words == " ":
         return ""
 
-    return " ".join(words.split())
+    return words
 
 
 def add_string(words, to_add=' '):
+    """
+    adds a string to the beginning of every string in a list
+    :param words: list of strings
+    :param to_add: string to add to the strings in the list
+    :return: list with to_add added to all elements
+    """
     return [str(word) + to_add for word in words]
 
 
 def next_word(f):
+    """
+    reads the next word from a file
+    :param f: file to read from (opened)
+    :return: next word
+    """
     global bytes_processed
     global gb_processed
 
@@ -188,19 +195,3 @@ def get_attributes():
                             print str(vehicle) + " " + str(ground) + "  ... " + line
 
     wd.save()
-
-
-def dump(inverses, path):
-    f = open(path, 'wb')
-    pickle.dump(inverses, f)
-    f.close()
-
-
-def open_thing(path):
-    f = open(path, 'rb')
-    array = pickle.load(f)
-    f.close()
-    return array
-
-
-
