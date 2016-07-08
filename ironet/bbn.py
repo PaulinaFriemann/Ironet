@@ -85,14 +85,14 @@ def f_such_as(such_as, ironic):
     """
     if ironic:
         if such_as:
-            return 0.09
+            return 0
         else:
-            return 0.91
+            return 1
     else:
         if such_as:
-            return 0.17
+            return 1
         else:
-            return 0.83
+            return 0
 
 
 def f_inverse_variation(inverse_var, ironic):
@@ -102,14 +102,34 @@ def f_inverse_variation(inverse_var, ironic):
     """
     if ironic:
         if inverse_var:
-            return 0.19
+            #return 0.246
+            #return 0.577 # ironic results > 0
+            #return 0.62 # iro results > 1/2
+            #return 0.54 # honest > 0
+            return 0.33 # honest >= 1/2
+            #return 0
         else:
-            return 0.81
+            #return 1
+            return 0.67 # honest >= 1/2
+            #return 0.46  # honest > 0
+            #return 0.423 # ironic results > 0
+            #return 0.38 # iro results > 1/2
+            #return 0.754
     else:
         if inverse_var:
-            return 0.26
+            return 0.44  # honest >= 1/2
+            #return 0.5 # ironic results > 0
+            #return 1
+            #return 0.744 # honest > 0
+            # return 0.78 # ironic results > 1/2
+            #return 0.8544
         else:
-            return 0.74
+            return 0.56  # honest >= 1/2
+            #return 0.5
+            #return 0.22 # ironic results > 1/2
+            #return 0.256 # honest > 0
+            #return 0
+            #return 0.1456
 
 
 def f_web_frequency(high_web_frequ, ironic):
@@ -118,13 +138,17 @@ def f_web_frequency(high_web_frequ, ironic):
     """
     if ironic:
         if high_web_frequ:
+            #return 0.453
             return 0.453
         else:
             return 0.547
+            #return 0.547
     else:
         if high_web_frequ:
             return 0.6
+            #return 0.6
         else:
             return 0.4
+            #return 0.4
 
 

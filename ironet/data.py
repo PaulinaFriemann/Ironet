@@ -62,10 +62,18 @@ class Data:
         return self.vehicles[vehicle]
 
     def get_ground(self, name):
-        return self.grounds[name]
+        try:
+            return self.grounds[name]
+        except KeyError:
+            self.add_ground(name)
+            return self.grounds[name]
 
     def get_vehicle(self, name):
-        return self.vehicles[name]
+        try:
+            return self.vehicles[name]
+        except KeyError:
+            self.add_vehicle(name)
+            return self.vehicles[name]
 
     def add_frequency(self, ground, vehicle, frequency, about_frequency):
         self.frequencies[(ground.name, vehicle.name)] = 0
@@ -79,6 +87,12 @@ class Data:
     def get_frequency_objects(self, ground, vehicle):
         try:
             return self.frequencies.get((ground.name, vehicle.name))
+        except KeyError:
+            return None
+
+    def get_inverse(self, ground, vehicle):
+        try:
+            return self.inverses.get((ground, vehicle))
         except KeyError:
             return None
 
@@ -105,14 +119,14 @@ class Data:
         pickle_data('ironic.p', self.ironic)
         pickle_data('similes_t.p', self.similes)
         pickle_data('similes_n.p', self.other_similes)
-        pickle_data('vehicles.p', self.vehicles)
-        pickle_data('inverses.p', self.inverses)
+        pickle_data('vehicles_w.p', self.vehicles)
+        pickle_data('inverses_w.p', self.inverses)
 
     def load(self):
         self.frequencies = load_data('frequencies.p')
-        self.grounds = load_data('grounds.p')
+        self.grounds = load_data('grounds_w.p')
         self.ironic = load_data('ironic.p')
         self.similes = load_data('similes_t.p')
         self.other_similes = load_data('similes_n.p')
-        self.vehicles = load_data('vehicles.p')
+        self.vehicles = load_data('vehicles_w.p')
         self.inverses = load_data('inverses.p')

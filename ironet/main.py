@@ -11,13 +11,16 @@ data = Data()
 
 def simulate_inverse(simile, g):
     global data
-    print "inverse"
+
     ironic_results = 0
-    for inverse in data.inverses[simile]:
-        if query(inverse, g, False, False, True, True, False):
+    for inverse in data.get_inverse(simile[0], simile[1]):
+        if not query(inverse, g, True, True, True, True, True):
             ironic_results += 1
 
-    return ironic_results >= len(data.inverses[simile])/2
+    print "inverse " + str(data.inverses[simile]) + " " + str(ironic_results) + " freque " + str(data.get_frequency(simile[0], simile[1]))
+
+    return not float(ironic_results) >= len(data.inverses[simile])/2
+    #return not float(ironic_results) > 0
 
 
 def query(simile, g, web_frequ=False, about=False, similarity=False, synonym_similar=False, codescr_similarity=False, such_as=False, inverse=False):
@@ -34,8 +37,10 @@ def query(simile, g, web_frequ=False, about=False, similarity=False, synonym_sim
         params["codescr_similar"] = sp.codescriptor_morph(simile)
     if such_as:
         params["such_as"] = sp.such_as(simile)
-    if inverse and data.inverses[simile] is not None:
+    if inverse and data.get_inverse(simile[0], simile[1]) is not None:
         params["inverse_var"] = simulate_inverse(simile, g)
+    print simile
+    result = g.q(**params)
     result = g.query(**params)
     return result[('ironic', True)] >= result[('ironic', False)]
 
@@ -43,6 +48,11 @@ def query(simile, g, web_frequ=False, about=False, similarity=False, synonym_sim
 def mainb():
 
     da = Data()
+    print len(data.similes)
+    for simile in da.other_similes:
+        if da.get_vehicle(simile[1]).has_attribute(da.get_ground(simile[0])):
+            print simile
+    da.save()
 
 
 def main():
@@ -57,7 +67,7 @@ def main():
         bbn.f_morphological_similarity,
         bbn.f_synonym_similar,
         bbn.f_codescr_morph,
-        bbn.f_such_as,
+        #bbn.f_such_as,
         bbn.f_inverse_variation,
         domains=dict(
             ironic=[True, False],
@@ -66,7 +76,7 @@ def main():
             similar=[True, False],
             synonym_similar=[True, False],
             codescr_similar=[True, False],
-            such_as=[True, False],
+         #   such_as=[True, False],
             inverse_var=[True, False]
         )
     )
@@ -80,12 +90,18 @@ def main():
     honest_as_ironic = 0
     ironic_as_honest = 0
 
+    print data.get_inverse('straight', 'rail')
+
+    #query(('straight', 'rail'), g, inverse=True)
+
     for simile in data.similes:
         include_inverse = False
-        if data.inverses[simile] is not None:
+        if data.get_inverse(simile[0], simile[1]) is not None:
             #if simile.inverse.frequency
             include_inverse = True
-        result = query(simile, g, web_frequ=True, about=True, similarity=True, synonym_similar=True, codescr_similarity=True, such_as=True, inverse=include_inverse)
+        #result = query(simile, g, web_frequ=False, about=False, similarity=False, synonym_similar=False, codescr_similarity=False, such_as=False, inverse=include_inverse)
+        result = query(simile, g, web_frequ=True, about=True, similarity=True, synonym_similar=True,
+                       codescr_similarity=True, such_as=False, inverse=include_inverse)
         if result:
             ironic.append(str(simile) + " i")
             if sp.ironic(simile):
@@ -103,10 +119,10 @@ def main():
                 #print "ironic as honest " + simile.name + " " + simile.get_frequencies()
                 ironic_as_honest += 1
 
-    print honest_as_honest
-    print ironic_as_honest
-    print ironic_as_ironic
-    print honest_as_ironic
+    print "honest as honest " + str(honest_as_honest)
+    print "ironic as honest " + str(ironic_as_honest)
+    print "ironic as ironic " + str(ironic_as_ironic)
+    print "honest as ironic " + str(honest_as_ironic)
 
 
 if __name__ == '__main__':

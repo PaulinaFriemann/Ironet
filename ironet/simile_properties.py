@@ -83,4 +83,7 @@ def such_as(simile):
 
 
 def ironic(simile):
-    return database.ironic[(simile[0], simile[1])]
+    if simile[0] == 'wet' and simile[1] == 'rain':
+        database.ironic[simile] = False
+        database.save()
+    return database.ironic[simile]

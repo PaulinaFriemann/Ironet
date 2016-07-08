@@ -51,7 +51,6 @@ class Word:
     """
     def __init__(self, name, word_type):
         self.name = name
-        self.attributes = []
         self.synonyms = [self.name]
 
         self.wordType = word_type
@@ -64,7 +63,7 @@ class Word:
 
 class Ground(Word):
     def __init__(self, name):
-        Word.__init__(name, wn.ADJ)
+        Word.__init__(self, name, wn.ADJ)
         self.codescriptors = []
         self.antonyms = []
 
@@ -79,7 +78,7 @@ class Ground(Word):
 
 class Vehicle(Word):
     def __init__(self, name):
-        Word.__init__(name, wn.NOUN)
+        Word.__init__(self, name, wn.NOUN)
         self.attributes = []
 
     def add_attribute(self, attribute):
