@@ -2,6 +2,7 @@
 Word Types (Grounds and Vehicles)
 """
 from nltk.corpus import wordnet as wn
+import rexgrabber as rex
 
 
 def find_synonyms(word, wn_type):
@@ -85,4 +86,18 @@ class Vehicle(Word):
         self.attributes.append(attribute)
 
     def has_attribute(self, attribute):
+        if type(attribute) == 'instance':
+            attribute = attribute.name
+        if not self.attributes:
+            self.attributes = rex.find_attributes(rex.do_request(self.name))
+
         return attribute in self.attributes
+
+
+def main():
+    gr = Ground('fast')
+    print gr.synonyms
+    print gr.antonyms
+
+if __name__=='__main__':
+    main()

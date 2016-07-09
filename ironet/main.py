@@ -2,6 +2,7 @@ from bayesian.bbn import *
 
 import bbn
 import simile_properties as sp
+import rexgrabber as rex
 
 import utils.text_utils as tu
 from data import Data
@@ -14,7 +15,7 @@ def simulate_inverse(simile, g):
 
     ironic_results = 0
     for inverse in data.get_inverse(simile[0], simile[1]):
-        if not query(inverse, g, True, True, True, True, True):
+        if not query(inverse, g, True, True, True, True, True, True):
             ironic_results += 1
 
     print "inverse " + str(data.inverses[simile]) + " " + str(ironic_results) + " freque " + str(data.get_frequency(simile[0], simile[1]))
@@ -36,26 +37,47 @@ def query(simile, g, web_frequ=False, about=False, similarity=False, synonym_sim
     if codescr_similarity:
         params["codescr_similar"] = sp.codescriptor_morph(simile)
     if such_as:
-        params["such_as"] = sp.such_as(simile)
+        params["attributes"] = sp.attributes(simile)
     if inverse and data.get_inverse(simile[0], simile[1]) is not None:
         params["inverse_var"] = simulate_inverse(simile, g)
     print simile
     result = g.q(**params)
     result = g.query(**params)
-    return result[('ironic', True)] >= result[('ironic', False)]
-
-
-def mainb():
-
-    da = Data()
-    print len(data.similes)
-    for simile in da.other_similes:
-        if da.get_vehicle(simile[1]).has_attribute(da.get_ground(simile[0])):
-            print simile
-    da.save()
+    return result[('ironic', True)] >= 0.5
+    #return result[('ironic', True)] >= result[('ironic', False)]
 
 
 def main():
+
+    da = Data()
+
+    #print da.get_vehicle('feather').attributes
+
+    # for vehicle in da.vehicles.values():
+    #     vehicle.attributes = []
+    #     vehicle.attributes = rex.find_attributes(rex.do_request(vehicle.name))
+    # da.save()
+
+    results = {}
+    print "la"
+    i = 0
+    for simile in da.similes:
+        print i
+        i+=0
+        if not da.ironic[simile]:
+            result = sp.synonym_has_attribute(simile)
+            try:
+                results[str(result)] += 1
+            except KeyError:
+                results[str(result)] = 1
+    print results
+
+    da.save()
+
+
+
+
+def mainb():
 
     print "build network"
     global data
@@ -67,8 +89,8 @@ def main():
         bbn.f_morphological_similarity,
         bbn.f_synonym_similar,
         bbn.f_codescr_morph,
-        #bbn.f_such_as,
         bbn.f_inverse_variation,
+        bbn.f_attributes,
         domains=dict(
             ironic=[True, False],
             high_web_frequ=[True, False],
@@ -76,8 +98,8 @@ def main():
             similar=[True, False],
             synonym_similar=[True, False],
             codescr_similar=[True, False],
-         #   such_as=[True, False],
-            inverse_var=[True, False]
+            inverse_var=[True, False],
+            attributes=['00', '10', '01', '11', '02', '12', '20', '21', '22']
         )
     )
     print "done"
@@ -90,18 +112,17 @@ def main():
     honest_as_ironic = 0
     ironic_as_honest = 0
 
-    print data.get_inverse('straight', 'rail')
 
-    #query(('straight', 'rail'), g, inverse=True)
+    #query(('straight', 'rail'), g, such_as=True)
 
     for simile in data.similes:
         include_inverse = False
         if data.get_inverse(simile[0], simile[1]) is not None:
             #if simile.inverse.frequency
             include_inverse = True
-        #result = query(simile, g, web_frequ=False, about=False, similarity=False, synonym_similar=False, codescr_similarity=False, such_as=False, inverse=include_inverse)
+       # result = query(simile, g, web_frequ=False, about=False, similarity=False, synonym_similar=False, codescr_similarity=False, such_as=True, inverse=include_inverse)
         result = query(simile, g, web_frequ=True, about=True, similarity=True, synonym_similar=True,
-                       codescr_similarity=True, such_as=False, inverse=include_inverse)
+                       codescr_similarity=True, such_as=True, inverse=include_inverse)
         if result:
             ironic.append(str(simile) + " i")
             if sp.ironic(simile):

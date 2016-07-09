@@ -7,7 +7,7 @@ def f_irony(ironic):
         #return 0.5
     else:
         #return 0.5
-        return 0.82
+       return 0.82
 
 
 def f_morphological_similarity(similar, ironic):
@@ -78,21 +78,9 @@ def f_about_frequency(about_dominant, ironic):
             return 0.948
 
 
-def f_such_as(such_as, ironic):
-    """
-    Step 5 and 6:
-    Is there a "GROUND * such as VEHICLE" found on the web? (or here: Wikipedia)
-    """
-    if ironic:
-        if such_as:
-            return 0
-        else:
-            return 1
-    else:
-        if such_as:
-            return 1
-        else:
-            return 0
+def f_attributes(attributes, ironic):
+    atts_probs = [{'00': 0.87, '10': 0.004, '01': 0.04, '11': 0.002, '02':1, '12':0.002, '20': 0.04, '21':0.013, '22':0.002}, {'00': 0.82, '10': 0.0364, '01': 0.0027, '11': 0.002, '02':0, '12':0, '20': 1, '21':0.0039, '22':0}]
+    return atts_probs[int(not ironic)][attributes]
 
 
 def f_inverse_variation(inverse_var, ironic):

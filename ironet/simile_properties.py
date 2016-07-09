@@ -2,6 +2,7 @@
 Properties of similes used for the Bayesian network
 """
 from data import Data
+import utils.rexgrabber as rex
 
 database = Data()
 
@@ -68,22 +69,66 @@ def high_web_frequency(simile):
     return database.get_frequency(simile[0], simile[1])[0] >= 10
 
 
-def such_as(simile):
+def ironic(simile):
+
+    return database.ironic[simile]
+
+
+def attributes(simile):
     """
-    Does the VEHICLE have the attribute GROUND? (Taken from Wikipedia -
-    "GROUND x such as VEHICLE")
-    :param simile:
+    Does the VEHICLE have the attribute GROUND? (Taken from Thesaurus Rex)
+    :param simile: (GROUND, VEHICLE)
     :return:
     """
+    syn_one_mult = 0
+    ant_one_mult = 0
+    ground = database.get_ground(simile[0])
+    vehicle = database.get_vehicle(simile[1])
 
-    if database.get_vehicle(simile[1]).has_attribute(database.get_ground(simile[0])):
-        return True
+    if vehicle.has_attribute(ground.name):
+        syn_one_mult = 1
+    for synonym in ground.synonyms:
+        if synonym != ground.name:
+            if vehicle.has_attribute(synonym):
+                syn_one_mult = 2
+                print synonym + ", ground: " + ground.name + ", vehicle: " + vehicle.name
+    if not ground.antonyms:
+        ant_one_mult = 0
     else:
-        return False
+        for antonym in ground.antonyms:
+            if vehicle.has_attribute(antonym):
+                if ant_one_mult == 0:
+                    ant_one_mult = 1
+                else:
+
+                    ant_one_mult = 2
+    return str(syn_one_mult)+ str(ant_one_mult)
 
 
-def ironic(simile):
-    if simile[0] == 'wet' and simile[1] == 'rain':
-        database.ironic[simile] = False
-        database.save()
-    return database.ironic[simile]
+def synonym_has_attribute(simile):
+    """
+    Does a synonym of VEHICLE have the attribute GROUND? (Taken from Thesaurus Rex)
+    :param simile: (GROUND, VEHICLE)
+    :return: 1 if one has the attribute, -1 if has antonym, 0 else
+    """
+    syn_one_mult = 0
+    ant_one_mult = 0
+    ground = database.get_ground(simile[0])
+    vehicles = database.get_vehicle(simile[1]).synonyms
+    print "Bla"
+    for vehicle in vehicles:
+        print "xs"
+        vehicle_object = database.get_vehicle(vehicle)
+
+        for synonym in ground.synonyms:
+            if vehicle_object.has_attribute(synonym):
+                database.save()
+                return 1
+        for antonym in ground.antonyms:
+            if vehicle_object.has_attribute(antonym):
+                database.save()
+                return -1
+
+    database.save()
+    return 0
+
