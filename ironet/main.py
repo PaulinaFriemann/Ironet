@@ -25,22 +25,20 @@ def simulate_inverse(simile, g):
     #return not float(ironic_results) > 0
 
 
-def query(simile, g, web_frequ=False, about=False, similarity=False, synonym_similar=False, codescr_similarity=False, such_as=False, inverse=False):
+def query(simile, g, web_frequ=False, about=False, similarity=False, attribute=False, inverse=False, syn_attributes=False):
     params = {}
     if web_frequ:
         params["high_web_frequ"] = sp.high_web_frequency(simile)
     if about:
         params["about_dominant"] = sp.about_dominant(simile)
     if similarity:
-        params["similar"] = sp.morphological_similar(simile)
-    if synonym_similar:
-        params["synonym_similar"] = sp.synonym_similar(simile)
-    if codescr_similarity:
-        params["codescr_similar"] = sp.codescriptor_morph(simile)
-    if such_as:
+        params["similar"] = sp.morphological_similar(simile) or sp.synonym_similar(simile) or sp.codescriptor_morph(simile)
+    if attribute:
         params["attributes"] = sp.attributes(simile)
     if inverse and data.get_inverse(simile[0], simile[1]) is not None:
         params["inverse_var"] = simulate_inverse(simile, g)
+    if syn_attributes:
+        params["syn_attributes"] = sp.syn_has_attributes(simile)
     print simile
     result = g.q(**params)
     result = g.query(**params)
@@ -54,20 +52,20 @@ def main():
 
     #print da.get_vehicle('feather').attributes
 
-    # for vehicle in da.vehicles.values():
+    # for vehicle in tqdm(da.vehicles.values()):
     #     vehicle.attributes = []
     #     vehicle.attributes = rex.find_attributes(rex.do_request(vehicle.name))
     # da.save()
-    num = 0
+
     # for simile in da.similes:
-    #     if da.ironic[simile]:
+    #     if not da.ironic[simile]:
     #         vehicle = da.get_vehicle(simile[1])
-    #         for syn in vehicle.synonyms:
-    #             print da.get_vehicle(syn).attributes
+    #
+    #         print vehicle.attributes
 
     results = {}
     for simile in tqdm(da.similes):
-        if not da.ironic[simile]:
+        if da.ironic[simile]:
             result = sp.synonym_has_attribute(simile)
             try:
                 results[str(result)] += 1
@@ -88,19 +86,17 @@ def mainb():
         bbn.f_web_frequency,
         bbn.f_about_frequency,
         bbn.f_morphological_similarity,
-        bbn.f_synonym_similar,
-        bbn.f_codescr_morph,
         bbn.f_inverse_variation,
         bbn.f_attributes,
+        bbn.f_synonym_attribute,
         domains=dict(
             ironic=[True, False],
             high_web_frequ=[True, False],
             about_dominant=[True, False],
             similar=[True, False],
-            synonym_similar=[True, False],
-            codescr_similar=[True, False],
             inverse_var=[True, False],
-            attributes=['00', '10', '01', '11', '02', '12', '20', '21', '22']
+            attributes=['00', '10', '01', '11', '02', '12', '20', '21', '22'],
+            syn_attributes=[1, 0, -1]
         )
     )
     print "done"
@@ -114,37 +110,36 @@ def mainb():
     ironic_as_honest = 0
 
 
-    #query(('straight', 'rail'), g, such_as=True)
+    query(('straight', 'rail'), g, attribute=True)
 
-    for simile in data.similes:
-        include_inverse = False
-        if data.get_inverse(simile[0], simile[1]) is not None:
-            #if simile.inverse.frequency
-            include_inverse = True
-       # result = query(simile, g, web_frequ=False, about=False, similarity=False, synonym_similar=False, codescr_similarity=False, such_as=True, inverse=include_inverse)
-        result = query(simile, g, web_frequ=True, about=True, similarity=True, synonym_similar=True,
-                       codescr_similarity=True, such_as=True, inverse=include_inverse)
-        if result:
-            ironic.append(str(simile) + " i")
-            if sp.ironic(simile):
-                #print "ironic as ironic " + simile.name + " " + simile.get_frequencies()
-                ironic_as_ironic += 1
-            else:
-                #print "honest as ironic " + simile.name + " " + simile.get_frequencies()
-                honest_as_ironic += 1
-        else:
-            honest.append(str(simile) + " h")
-            if not sp.ironic(simile):
-                #print "honest as honest " + simile.name + " " + simile.get_frequencies()
-                honest_as_honest += 1
-            else:
-                #print "ironic as honest " + simile.name + " " + simile.get_frequencies()
-                ironic_as_honest += 1
-
-    print "honest as honest " + str(honest_as_honest)
-    print "ironic as honest " + str(ironic_as_honest)
-    print "ironic as ironic " + str(ironic_as_ironic)
-    print "honest as ironic " + str(honest_as_ironic)
+    # for simile in data.similes:
+    #     include_inverse = False
+    #     if data.get_inverse(simile[0], simile[1]) is not None:
+    #         #if simile.inverse.frequency
+    #         include_inverse = True
+    #    # result = query(simile, g, web_frequ=False, about=False, similarity=False, synonym_similar=False, codescr_similarity=False, such_as=True, inverse=include_inverse)
+    #     result = query(simile, g, web_frequ=True, about=True, similarity=True, such_as=True, inverse=include_inverse, syn_attributes=True)
+    #     if result:
+    #         ironic.append(str(simile) + " i")
+    #         if sp.ironic(simile):
+    #             #print "ironic as ironic " + simile.name + " " + simile.get_frequencies()
+    #             ironic_as_ironic += 1
+    #         else:
+    #             #print "honest as ironic " + simile.name + " " + simile.get_frequencies()
+    #             honest_as_ironic += 1
+    #     else:
+    #         honest.append(str(simile) + " h")
+    #         if not sp.ironic(simile):
+    #             #print "honest as honest " + simile.name + " " + simile.get_frequencies()
+    #             honest_as_honest += 1
+    #         else:
+    #             #print "ironic as honest " + simile.name + " " + simile.get_frequencies()
+    #             ironic_as_honest += 1
+    #
+    # print "honest as honest " + str(honest_as_honest)
+    # print "ironic as honest " + str(ironic_as_honest)
+    # print "ironic as ironic " + str(ironic_as_ironic)
+    # print "honest as ironic " + str(honest_as_ironic)
 
 
 if __name__ == '__main__':

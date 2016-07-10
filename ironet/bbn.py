@@ -19,47 +19,15 @@ def f_morphological_similarity(similar, ironic):
     """
     if ironic:
         if similar:
-            return 0.0067
+            return 0.007
         else:
             return 0.993
     else:
         if similar:
-            return 0.02348
+            return 1
         else:
-            return 0.97651
+            return 0.975
 
-
-def f_synonym_similar(synonym_similar, ironic):
-    if ironic:
-        if synonym_similar:
-            return 0.0055
-        else:
-            return 0.9945
-    else:
-        if synonym_similar:
-            return 0.02
-        else:
-            return 0.98
-
-
-# TODO test and get frequencies
-def f_codescr_morph(codescr_similar, ironic):
-    """
-    Step 1, c)
-    Is there a lexical similarity between vehicle and a codescriptor of the ground?
-    :param similar: morphological similarity?
-    :param ironic: truth value of irony
-    """
-    if ironic:
-        if codescr_similar:
-            return 0.00169
-        else:
-            return 0.99831
-    else:
-        if codescr_similar:
-            return 0.0011
-        else:
-            return 0.9989
 
 
 def f_about_frequency(about_dominant, ironic):
@@ -81,6 +49,25 @@ def f_about_frequency(about_dominant, ironic):
 def f_attributes(attributes, ironic):
     atts_probs = [{'00': 0.87, '10': 0.004, '01': 0.04, '11': 0.002, '02':1, '12':0.002, '20': 0.04, '21':0.013, '22':0.002}, {'00': 0.82, '10': 0.0364, '01': 0.0027, '11': 0.002, '02':0, '12':0, '20': 1, '21':0.0039, '22':0}]
     return atts_probs[int(not ironic)][attributes]
+
+
+def f_synonym_attribute(syn_attributes, ironic):
+
+    if ironic:
+        if syn_attributes == 1:
+            return 0.092
+        elif syn_attributes == -1:
+            return 0.0527
+        elif syn_attributes == 0:
+            return 0.83
+
+    else:
+        if syn_attributes == 1:
+            return 0.241
+        elif syn_attributes == -1:
+            return 0.006
+        elif syn_attributes == 0:
+            return 0.75
 
 
 def f_inverse_variation(inverse_var, ironic):

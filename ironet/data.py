@@ -77,6 +77,7 @@ class Data:
         try:
             return self.vehicles[name]
         except KeyError:
+            print name
             self.add_vehicle(name)
             return self.vehicles[name]
 
