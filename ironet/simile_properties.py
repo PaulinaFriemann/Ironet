@@ -3,6 +3,7 @@ Properties of similes used for the Bayesian network
 """
 from data import Data
 import utils.rexgrabber as rex
+from collections import Counter
 
 database = Data()
 
@@ -111,24 +112,46 @@ def synonym_has_attribute(simile):
     :param simile: (GROUND, VEHICLE)
     :return: 1 if one has the attribute, -1 if has antonym, 0 else
     """
-    syn_one_mult = 0
-    ant_one_mult = 0
     ground = database.get_ground(simile[0])
     vehicles = database.get_vehicle(simile[1]).synonyms
-    print "Bla"
-    for vehicle in vehicles:
-        print "xs"
+
+    print len(ground.antonyms)
+
+    has = 0
+    has_not = 0
+    results = []
+
+    for vehicle, i in enumerate(vehicles):
+
         vehicle_object = database.get_vehicle(vehicle)
 
         for synonym in ground.synonyms:
             if vehicle_object.has_attribute(synonym):
-                database.save()
-                return 1
+                has += 1
         for antonym in ground.antonyms:
             if vehicle_object.has_attribute(antonym):
-                database.save()
-                return -1
+                has_not += 1
 
-    database.save()
-    return 0
+        if len(ground.synonyms) != 0:
+            has_percent = has / len(ground.synonyms)
+        else:
+            has_percent = 0
+        if len(ground.antonyms) != 0:
+            has_not_percent = has_not / len(ground.antonyms)
+        else:
+            has_not_percent = 0
+
+        if has_percent > has_not_percent:
+            results[i] = 1
+        elif has < has_not:
+            results[i] = -1
+        else:
+            results[i] = 0
+
+    result = 0
+    for res in results:
+        result += res
+    database.attribute_results[simile] = result
+
+    return result
 

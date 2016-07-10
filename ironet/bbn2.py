@@ -51,6 +51,11 @@ def f_attributes(attributes, ironic):
     return atts_probs[int(not ironic)][attributes]
 
 
+def synonym_attribute(attributes, ironic):
+    # TODO
+    pass
+
+
 def f_inverse_variation(inverse_var, ironic):
     """
     Step 7:

@@ -3,6 +3,7 @@ from bayesian.bbn import *
 import bbn
 import simile_properties as sp
 import rexgrabber as rex
+from tqdm import tqdm
 
 import utils.text_utils as tu
 from data import Data
@@ -57,13 +58,15 @@ def main():
     #     vehicle.attributes = []
     #     vehicle.attributes = rex.find_attributes(rex.do_request(vehicle.name))
     # da.save()
+    num = 0
+    # for simile in da.similes:
+    #     if da.ironic[simile]:
+    #         vehicle = da.get_vehicle(simile[1])
+    #         for syn in vehicle.synonyms:
+    #             print da.get_vehicle(syn).attributes
 
     results = {}
-    print "la"
-    i = 0
-    for simile in da.similes:
-        print i
-        i+=0
+    for simile in tqdm(da.similes):
         if not da.ironic[simile]:
             result = sp.synonym_has_attribute(simile)
             try:
@@ -73,8 +76,6 @@ def main():
     print results
 
     da.save()
-
-
 
 
 def mainb():

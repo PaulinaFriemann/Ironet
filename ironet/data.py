@@ -45,6 +45,7 @@ class Data:
         self.other_similes = []
         self.inverses = dict()
         self.simile_tuples = []
+        self.attribute_results = dict()
 
         self.load()
 
@@ -62,6 +63,8 @@ class Data:
         return self.vehicles[vehicle]
 
     def get_ground(self, name):
+        if type(name) == 'instance':
+            name = name.name
         try:
             return self.grounds[name]
         except KeyError:
@@ -69,6 +72,8 @@ class Data:
             return self.grounds[name]
 
     def get_vehicle(self, name):
+        if type(name) == 'instance':
+            name = name.name
         try:
             return self.vehicles[name]
         except KeyError:

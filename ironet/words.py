@@ -81,6 +81,7 @@ class Vehicle(Word):
     def __init__(self, name):
         Word.__init__(self, name, wn.NOUN)
         self.attributes = []
+        self.loaded = False
 
     def add_attribute(self, attribute):
         self.attributes.append(attribute)
@@ -88,8 +89,6 @@ class Vehicle(Word):
     def has_attribute(self, attribute):
         if type(attribute) == 'instance':
             attribute = attribute.name
-        if not self.attributes:
-            self.attributes = rex.find_attributes(rex.do_request(self.name))
 
         return attribute in self.attributes
 
