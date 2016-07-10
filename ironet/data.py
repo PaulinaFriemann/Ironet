@@ -1,3 +1,6 @@
+"""
+Stores all the needed data about the similes
+"""
 from words import *
 import utils.query_utils as qu
 import pickle
@@ -38,13 +41,12 @@ class Data:
 
     def __init__(self):
         self.frequencies = dict()  # (ground, vehicle)
-        self.similes = []
-        self.grounds = dict()
-        self.vehicles = dict()
+        self.similes = []  # (ground, vehicle)
+        self.grounds = dict()  # stores objects to names
+        self.vehicles = dict()  # objects to names
         self.ironic = dict()  # (ground, vehicle)
-        self.other_similes = []
+        self.other_similes = []  # the similes which do not have a frequency yet
         self.inverses = dict()
-        self.simile_tuples = []
         self.attribute_results = dict()
 
         self.load()
@@ -82,17 +84,15 @@ class Data:
             return self.vehicles[name]
 
     def add_frequency(self, ground, vehicle, frequency, about_frequency):
-        self.frequencies[(ground.name, vehicle.name)] = 0
+        self.frequencies[(ground.name, vehicle.name)] = [frequency, about_frequency]
 
-    def get_frequency(self, ground, vehicle):
+    def get_frequencies(self, ground, vehicle):
+        if type(ground) == 'instance':
+            ground = ground.name
+        if type(vehicle) == 'instance':
+            vehicle = vehicle.name
         try:
             return self.frequencies.get((ground, vehicle))
-        except KeyError:
-            return None
-
-    def get_frequency_objects(self, ground, vehicle):
-        try:
-            return self.frequencies.get((ground.name, vehicle.name))
         except KeyError:
             return None
 
@@ -102,13 +102,17 @@ class Data:
         except KeyError:
             return None
 
-    def get_simile(self, ground, vehicle):
+    def get_simile_name(self, ground, vehicle):
         return "as " + ground + " as " + "a|an " + vehicle
 
     def find_frequency(self, simile):
+        """
+        finds the web frequency of a simile with and without the about marker
+        :param simile: (ground, vehicle)
+        """
         frequency = 0
         about_frequency = 0
-        if not self.get_frequency_objects(simile.ground, simile.vehicle):
+        if not self.get_frequencies(simile.ground, simile.vehicle):
             frequency = int(qu.get_num_results(simile.name, simile.vehicle.name))
 
         if frequency != 0:
@@ -125,14 +129,16 @@ class Data:
         pickle_data('ironic.p', self.ironic)
         pickle_data('similes_t.p', self.similes)
         pickle_data('similes_n.p', self.other_similes)
-        pickle_data('vehicles_w.p', self.vehicles)
-        pickle_data('inverses_w.p', self.inverses)
+        pickle_data('vehicles.p', self.vehicles)
+        pickle_data('inverses.p', self.inverses)
+        pickle_data('attribute_results.p', self.attribute_results)
 
     def load(self):
         self.frequencies = load_data('frequencies.p')
-        self.grounds = load_data('grounds_w.p')
+        self.grounds = load_data('grounds.p')
         self.ironic = load_data('ironic.p')
         self.similes = load_data('similes_t.p')
         self.other_similes = load_data('similes_n.p')
-        self.vehicles = load_data('vehicles_w.p')
+        self.vehicles = load_data('vehicles.p')
         self.inverses = load_data('inverses.p')
+        self.attribute_results = load_data('attribute_results.p')

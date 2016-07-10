@@ -80,8 +80,6 @@ def get_codescriptors():
     import sys
     sys.path.insert(1, '../')
 
-    import ironet.words
-
     data = Data()
 
     with open('../res/wiki/alland.txt', 'r') as f:
@@ -105,15 +103,16 @@ def get_codescriptors():
 
 
 def get_ground_and():
+    """
+    Gets all "as * and * as " forms from Wikipedia
+    """
 
     with open('../res/wiki/alland.txt', 'w') as f:
         with open('E:/Documents/Workspace/wikitext.txt', 'r') as wikitext:
 
             word = ' '
-            last_word = ''
             while word != '':
                 word = next_word(wikitext)
-                # print word
                 if word == "as ":
                     next_w = next_word(wikitext)
                     nextnext_w = next_word(wikitext)
@@ -122,11 +121,14 @@ def get_ground_and():
                         nextnextnext_w = next_word(wikitext)
 
                         if next_word(wikitext) == "as ":
-                            #print word + next_w + nextnext_w + nextnextnext_w + "as "
                             f.write(word + next_w + nextnext_w + nextnextnext_w + "as\n")
 
 
 def get_all_such():
+    """
+    Finds all "such as" forms in Wikipedia
+    :return:
+    """
 
     def last_chars(f, pos):
         try:
@@ -153,11 +155,9 @@ def get_all_such():
 
             while word != '':
                 word = next_word(wikitext)
-                #print word
                 if word == "such ":
                     next_w = next_word(wikitext)
                     if next_w == "as ":
-                        #print "sSZCHG ASSS!!!"
 
                         chars = last_chars(wikitext, wikitext.tell()) + next_chars(wikitext)
 
@@ -165,6 +165,9 @@ def get_all_such():
 
 
 def get_attributes():
+    """
+    Gets all attributes for all vehicles ("GROUND * such as VEHICLE")
+    """
     wd = Data()
 
     for vehicle in wd.vehicles.keys():

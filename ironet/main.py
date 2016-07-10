@@ -1,11 +1,12 @@
+"""
+This NEEDS the Bayesian network library from https://github.com/eBay/bayesian-belief-networks
+"""
 from bayesian.bbn import *
 
 import bbn
 import simile_properties as sp
-import rexgrabber as rex
 from tqdm import tqdm
 
-import utils.text_utils as tu
 from data import Data
 
 data = Data()
@@ -16,16 +17,25 @@ def simulate_inverse(simile, g):
 
     ironic_results = 0
     for inverse in data.get_inverse(simile[0], simile[1]):
-        if not query(inverse, g, True, True, True, True, True, True):
+        if not query(inverse, g, web_frequ=True, about=True, similarity=True, attribute=True, inverse=False, syn_attributes=True):
             ironic_results += 1
 
-    print "inverse " + str(data.inverses[simile]) + " " + str(ironic_results) + " freque " + str(data.get_frequency(simile[0], simile[1]))
-
     return not float(ironic_results) >= len(data.inverses[simile])/2
-    #return not float(ironic_results) > 0
 
 
 def query(simile, g, web_frequ=False, about=False, similarity=False, attribute=False, inverse=False, syn_attributes=False):
+    """
+    Convenience Function. Does a query for the bayesian network
+    :param simile:
+    :param g: network
+    :param web_frequ: use the web frequency
+    :param about: use "about"-dominance attribute
+    :param similarity: use morphological similarity
+    :param attribute: use vehicle attributes
+    :param inverse: simulate inverse
+    :param syn_attributes: use attributes of the synonyms of the vehicle
+    :return: True if marked as ironic
+    """
     params = {}
     if web_frequ:
         params["high_web_frequ"] = sp.high_web_frequency(simile)
@@ -39,47 +49,12 @@ def query(simile, g, web_frequ=False, about=False, similarity=False, attribute=F
         params["inverse_var"] = simulate_inverse(simile, g)
     if syn_attributes:
         params["syn_attributes"] = sp.syn_has_attributes(simile)
-    print simile
-    result = g.q(**params)
+
     result = g.query(**params)
     return result[('ironic', True)] >= 0.5
-    #return result[('ironic', True)] >= result[('ironic', False)]
 
 
-def main():
-
-    da = Data()
-
-    #print da.get_vehicle('feather').attributes
-
-    # for vehicle in tqdm(da.vehicles.values()):
-    #     vehicle.attributes = []
-    #     vehicle.attributes = rex.find_attributes(rex.do_request(vehicle.name))
-    # da.save()
-
-    # for simile in da.similes:
-    #     if not da.ironic[simile]:
-    #         vehicle = da.get_vehicle(simile[1])
-    #
-    #         print vehicle.attributes
-
-    results = {}
-    for simile in tqdm(da.similes):
-        if da.ironic[simile]:
-            result = sp.synonym_has_attribute(simile)
-            try:
-                results[str(result)] += 1
-            except KeyError:
-                results[str(result)] = 1
-    print results
-
-    da.save()
-
-
-def mainb():
-
-    print "build network"
-    global data
+def build_network():
 
     g = build_bbn(
         bbn.f_irony,
@@ -99,6 +74,17 @@ def mainb():
             syn_attributes=[1, 0, -1]
         )
     )
+
+    return g
+
+
+def main():
+
+    print "build network"
+    global data
+
+    g = build_network()
+
     print "done"
 
     honest = []
@@ -109,37 +95,30 @@ def mainb():
     honest_as_ironic = 0
     ironic_as_honest = 0
 
+    for simile in tqdm(data.similes):
+        include_inverse = False
+        if data.get_inverse(simile[0], simile[1]) is not None:
+            include_inverse = True
 
-    query(('straight', 'rail'), g, attribute=True)
+        result = query(simile, g, web_frequ=True, about=True, similarity=True, attribute=True, inverse=include_inverse, syn_attributes=True)
 
-    # for simile in data.similes:
-    #     include_inverse = False
-    #     if data.get_inverse(simile[0], simile[1]) is not None:
-    #         #if simile.inverse.frequency
-    #         include_inverse = True
-    #    # result = query(simile, g, web_frequ=False, about=False, similarity=False, synonym_similar=False, codescr_similarity=False, such_as=True, inverse=include_inverse)
-    #     result = query(simile, g, web_frequ=True, about=True, similarity=True, such_as=True, inverse=include_inverse, syn_attributes=True)
-    #     if result:
-    #         ironic.append(str(simile) + " i")
-    #         if sp.ironic(simile):
-    #             #print "ironic as ironic " + simile.name + " " + simile.get_frequencies()
-    #             ironic_as_ironic += 1
-    #         else:
-    #             #print "honest as ironic " + simile.name + " " + simile.get_frequencies()
-    #             honest_as_ironic += 1
-    #     else:
-    #         honest.append(str(simile) + " h")
-    #         if not sp.ironic(simile):
-    #             #print "honest as honest " + simile.name + " " + simile.get_frequencies()
-    #             honest_as_honest += 1
-    #         else:
-    #             #print "ironic as honest " + simile.name + " " + simile.get_frequencies()
-    #             ironic_as_honest += 1
-    #
-    # print "honest as honest " + str(honest_as_honest)
-    # print "ironic as honest " + str(ironic_as_honest)
-    # print "ironic as ironic " + str(ironic_as_ironic)
-    # print "honest as ironic " + str(honest_as_ironic)
+        if result:
+            ironic.append(str(simile) + " i")
+            if sp.ironic(simile):
+                ironic_as_ironic += 1
+            else:
+                honest_as_ironic += 1
+        else:
+            honest.append(str(simile) + " h")
+            if not sp.ironic(simile):
+                honest_as_honest += 1
+            else:
+                ironic_as_honest += 1
+
+    print "honest as honest " + str(honest_as_honest)
+    print "ironic as honest " + str(ironic_as_honest)
+    print "ironic as ironic " + str(ironic_as_ironic)
+    print "honest as ironic " + str(honest_as_ironic)
 
 
 if __name__ == '__main__':

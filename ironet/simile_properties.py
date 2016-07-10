@@ -2,8 +2,6 @@
 Properties of similes used for the Bayesian network
 """
 from data import Data
-import utils.rexgrabber as rex
-from collections import Counter
 
 database = Data()
 
@@ -30,7 +28,6 @@ def synonym_similar(simile):
 
     for word in database.get_ground(simile[0]).synonyms[1:]:
         if simile[1] in word:
-            print word + " " + simile[1]
             return True
 
     return False
@@ -44,7 +41,6 @@ def codescriptor_morph(simile):
     """
     for word in database.get_ground(simile[0]).codescriptors:
         if simile[1] in word:
-            print simile[1] + " " + word
             return True
     return False
 
@@ -56,8 +52,8 @@ def about_dominant(simile):
     :return:
     """
 
-    return database.get_frequency(simile[0], simile[1])[1] \
-           >= 0.5 * database.get_frequency(simile[0], simile[1])[0]
+    return database.get_frequencies(simile[0], simile[1])[1] \
+           >= 0.5 * database.get_frequencies(simile[0], simile[1])[0]
 
 
 def high_web_frequency(simile):
@@ -67,7 +63,7 @@ def high_web_frequency(simile):
     :return: True if more than 10, else false
     """
 
-    return database.get_frequency(simile[0], simile[1])[0] >= 10
+    return database.get_frequencies(simile[0], simile[1])[0] >= 10
 
 
 def ironic(simile):
@@ -85,10 +81,6 @@ def attributes(simile):
     ant_one_mult = 0
     ground = database.get_ground(simile[0])
     vehicle = database.get_vehicle(simile[1])
-
-    print vehicle.name
-    print vehicle.attributes
-
 
     if vehicle.has_attribute(ground.name):
 
@@ -111,8 +103,17 @@ def attributes(simile):
 
 
 def syn_has_attributes(simile):
-
-    return database.attribute_results[simile]
+    """
+    Does a synonym of VEHICLE have the attribute GROUND? (Taken from Thesaurus Rex)
+    :param simile: (GROUND, VEHICLE)
+    :return: 1 if one has the attribute, -1 if has antonym, 0 else
+    """
+    try:
+        return database.attribute_results[simile]
+    except KeyError:
+        database.attribute_results[simile] = synonym_has_attribute(simile)
+        database.save()
+        return database.attribute_results[simile]
 
 
 def synonym_has_attribute(simile):
